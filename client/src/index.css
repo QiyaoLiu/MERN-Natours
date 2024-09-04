@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input[type="text"],
+input[type="name"],
+input[type="password"],
+input[type="email"] {
+  @apply w-full border my-2 py-2 px-3 rounded-2xl;
+}
+
+button.primary {
+  background-color: #28b487;
+  @apply bg-primary p-2 w-full text-white rounded-2xl;
+}
+.tour-card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover; /* Ensure image covers the area */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 80%, 0% 100%);
+}
+
+.tour-image {
+  width: 100%;
+  height: 5%;
+  object-fit: cover; /* Ensure image covers the area */
+  clip-path: polygon(
+    0% 0%,
+    100% 0%,
+    100% 80%,
+    0% 100%
+  ); /* Creates the trapezoid shape */
+}
+
+.tour-images {
+}
+
+.guide-image {
+  border-radius: 50%;
+  height: 2rem;
+}
+.user-image {
+  border-radius: 50%;
+  height: 2rem;
+}
+
+.tour-name {
+  position: absolute; /* Position text absolutely within the relative container */
+  bottom: 10px; /* Adjust to position text closer to the bottom of the container */
+  right: 10px; /* Adjust to position text closer to the right of the container */
+  padding: 0.5rem; /* Add some padding around the text */
+  /* Background color with opacity for better readability */
+  color: white; /* Text color */
+  background-color: #018034;
+  border-top-left-radius: 0.5rem; /* Optional: Add border radius for rounded corners */
+  z-index: 5; /* Ensure text is above other content */
+}
+.cover {
+  position: relative; /* Establishes a positioning context for the child elements */
+  overflow: hidden; /* Ensure content doesn't overflow */
+}
+
+.icon-small {
+  width: 20px;
+  height: 20px;
+}
+
+.tour-card {
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  height: 100%; /* Ensure it takes full height available */
+  overflow: hidden; /* Hide any overflow from content */
+  height: 100%;
+}
+
+.tour-info {
+  flex: 1; /* Grow to fill available space */
+}
+
+/* index.css */
+
+/* Notification container styles */
+.notification {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 9999;
+  display: flex;
+  justify-content: space-between; /* Space between message and button */
+  align-items: center; /* Center items vertically */
+  max-width: 300px;
+}
+
+/* Notification message styles */
+.notification p {
+  margin: 0; /* Remove default margin */
+  flex: 1; /* Allow the message to take up available space */
+}
+
+/* Close button styles */
+.notification button {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-left: 1rem; /* Space between message and button */
+}
+
+/* Optional: Add animation */
+.notification {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
+
+.notification.show {
+  opacity: 1;
+}
