@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { UserContext } from "../UserContext";
@@ -11,6 +11,7 @@ export default function SignupPage() {
   const [role, setRole] = useState("user");
   const [roles, setRoles] = useState([]);
   const { showNotification } = useContext(UserContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -38,6 +39,7 @@ export default function SignupPage() {
         role,
       });
       console.log("Signup successful:", res.data.data);
+      navigate("/tours");
     } catch (error) {
       console.error("Signup failed:", error.response?.data);
       showNotification(

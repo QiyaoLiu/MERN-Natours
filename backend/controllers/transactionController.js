@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 // Middleware to start a transaction
 exports.startTransaction = async (req, res, next) => {
+  console.log('Starting transaction...');
   req.session = await mongoose.startSession();
   req.session.startTransaction();
   next();
