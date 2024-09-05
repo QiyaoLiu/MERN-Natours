@@ -16,8 +16,10 @@ const reviewRouter = require('./routes/reviewRoutes');
 
 const app = express();
 
-//Global middlewares
+// Trust the first proxy (for express-rate-limit and other middlewares)
+app.set('trust proxy', 1); // Trust first proxy
 
+//Global middlewares
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
