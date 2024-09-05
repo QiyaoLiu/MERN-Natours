@@ -22,7 +22,7 @@ app.set('trust proxy', 1); // Trust first proxy
 //Global middlewares
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: 'https://mern-natours.onrender.com', // Replace with your deployed frontend URL
     credentials: true,
   })
 );
