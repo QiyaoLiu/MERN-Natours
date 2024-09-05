@@ -12,7 +12,7 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
-const reviewRouter = require('./routes/reviewRoutes');
+const reviewRouter = require('./routes/reviewRoutestra');
 
 const transactionController = require('./controllers/transactionController');
 
@@ -24,7 +24,10 @@ app.set('trust proxy', 1); // Trust first proxy
 //Global middlewares
 app.use(
   cors({
-    origin: 'https://mern-natours.onrender.com', // Replace with your deployed frontend URL
+    origin:
+      process.env.NODE_ENV === 'development'
+        ? 'http://localhost:3000'
+        : 'https://mern-natours.onrender.com',
     credentials: true,
   })
 );
