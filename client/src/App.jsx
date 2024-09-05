@@ -13,7 +13,7 @@ import Notification from "./Notification.jsx";
 
 axios.defaults.baseURL =
   process.env.NODE_ENV === "production"
-    ? "https://your-backend.onrender.com/api/v1" // Use deployed backend URL
+    ? "https://mern-natours-backend.onrender.com" // Use deployed backend URL
     : "http://localhost:8000/api/v1"; // Local development backend
 axios.defaults.withCredentials = true;
 
