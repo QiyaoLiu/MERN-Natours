@@ -39,7 +39,7 @@ export default function SignupPage() {
         role,
       });
       console.log("Signup successful:", res.data.data);
-      navigate("/tours");
+      navigate("/");
     } catch (error) {
       console.error("Signup failed:", error.response?.data);
       showNotification(
