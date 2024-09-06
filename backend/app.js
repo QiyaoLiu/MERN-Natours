@@ -14,8 +14,6 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 
-const transactionController = require('./controllers/transactionController');
-
 const app = express();
 
 // Trust the first proxy (for express-rate-limit and other middlewares)
@@ -108,24 +106,9 @@ app.get('/', (req, res) => {
 //   });
 // });
 
-app.use(
-  '/api/v1/tours',
-  transactionController.startTransaction,
-  tourRouter,
-  transactionController.endTransaction
-);
-app.use(
-  '/api/v1/users',
-  transactionController.startTransaction,
-  userRouter,
-  transactionController.endTransaction
-);
-app.use(
-  '/api/v1/reviews',
-  transactionController.startTransaction,
-  reviewRouter,
-  transactionController.endTransaction
-);
+app.use('/api/v1/tours', tourRouter);
+app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));

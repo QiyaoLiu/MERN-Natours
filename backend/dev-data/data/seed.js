@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const fs = require('fs');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 const Tour = require('./../../models/tourModel');
 const User = require('./../../models/userModel');
 const Review = require('./../../models/reviewModel');
@@ -32,26 +33,40 @@ const seedDatabase = async () => {
     console.error('Failed to seed database:', err);
   } finally {
     mongoose.connection.close();
+    console.log('Database connection closed.');
   }
 };
 
-// Connect to MongoDB and start the seeding process
-const DB = process.env.DATABASE.replace(
-  '<PASSWORD>',
-  process.env.DATABASE_PASSWORD
-);
+const startSeeding = async () => {
+  try {
+    let DB;
 
-if (!DB) {
-  console.error('DATABASE environment variable is not set.');
-  process.exit(1);
-}
+    if (process.env.NODE_ENV === 'production') {
+      // Use MongoDB Memory Server in production
+      const mongoServer = await MongoMemoryServer.create();
+      DB = mongoServer.getUri();
+      console.log('Using in-memory MongoDB for seeding');
+    } else {
+      // Connect to actual MongoDB in development
+      DB = process.env.DATABASE.replace(
+        '<PASSWORD>',
+        process.env.DATABASE_PASSWORD
+      );
+      if (!DB) {
+        console.error('DATABASE environment variable is not set.');
+        process.exit(1);
+      }
+      console.log('Using real MongoDB for seeding');
+    }
 
-mongoose
-  .connect(DB)
-  .then(() => {
-    console.log('Connected to MongoDB');
-    return seedDatabase();
-  })
-  .catch((err) => {
-    console.error('Failed to connect to MongoDB:', err);
-  });
+    await mongoose.connect(DB);
+    console.log('Connected to MongoDB for seeding');
+
+    await seedDatabase();
+  } catch (err) {
+    console.error('Failed to seed database:', err);
+    process.exit(1);
+  }
+};
+
+startSeeding();
