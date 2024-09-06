@@ -1,84 +1,48 @@
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 const dotenv = require('dotenv');
-const seedDatabase = require('./dev-data/data/seed');
+const app = require('./app');
 
+// Load environment variables
 dotenv.config({ path: './config.env' });
 
+// Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
-  console.log('UNHANDLED REJECTION! SHUTTING DOWN...');
+  console.log('UNCAUGHT EXCEPTION! SHUTTING DOWN...');
   console.log(err.name, err.message);
   process.exit(1);
 });
 
-const app = require('./app');
-
-// MongoDB connection
-let mongoServer;
-let DB;
-
 const startServer = async () => {
-  if (process.env.NODE_ENV === 'production') {
-    // Use MongoDB Memory Server for demo environment
-    mongoServer = await MongoMemoryServer.create();
-    const uri = mongoServer.getUri();
-    await mongoose.connect(uri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('Connected to in-memory MongoDB');
-    await seedDatabase(); // Seed the database with initial data on start
-  } else {
-    // Connect to real MongoDB in non-demo environments
-    DB = process.env.DATABASE.replace(
+  try {
+    const DB = process.env.DATABASE.replace(
       '<PASSWORD>',
       process.env.DATABASE_PASSWORD
     );
-    await mongoose.connect(DB, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log('Connected to MongoDB');
-  }
-
-  const port = process.env.PORT || 3000;
-  const server = app.listen(port, () => {
-    console.log(`App running on port ${port}...`);
-  });
-
-  process.on('unhandledRejection', (err) => {
-    console.log('UNHANDLED REJECTION! SHUTTING DOWN...');
-    console.log(err.name, err.message);
-    server.close(() => {
+    if (!DB) {
+      console.error('DATABASE environment variable is not set.');
       process.exit(1);
+    }
+
+    // Connect to MongoDB
+    await mongoose.connect(DB);
+    console.log('Connected to MongoDB');
+
+    const port = process.env.PORT || 3000;
+    const server = app.listen(port, () => {
+      console.log(`App running on port ${port}...`);
     });
-  });
+
+    process.on('unhandledRejection', (err) => {
+      console.log('UNHANDLED REJECTION! SHUTTING DOWN...');
+      console.log(err.name, err.message);
+      server.close(() => {
+        process.exit(1);
+      });
+    });
+  } catch (err) {
+    console.error('Error starting server:', err);
+    process.exit(1);
+  }
 };
 
 startServer();
-// Connect to the appropriate database (in-memory or real MongoDB)
-
-// // console.log(process.env);
-// const DB = process.env.DATABASE.replace(
-//   '<PASSWORD>',
-//   process.env.DATABASE_PASSWORD
-// );
-
-// mongoose.connect(DB).then(() => {
-//   // const con = mongoose.connection;
-//   // console.log('Full Connection Object:', con);
-//   console.log('Connected successfully to MongoDB');
-// });
-
-// const port = process.env.PORT || 3000;
-// const server = app.listen(port, () => {
-//   console.log(`App running on port ${port}...`);
-// });
-
-// process.on('unhandledRejection', (err) => {
-//   console.log('UNHANDLED REJECTION! SHUTTING DOWN...');
-//   console.log(err.name, err.message);
-//   server.close(() => {
-//     process.exit(1);
-//   });
-// });
