@@ -17,39 +17,45 @@ const app = require('./app');
 let mongoServer;
 let DB;
 
-if (process.env.NODE_ENV === 'production') {
-  // Use MongoDB Memory Server in production for demo
-  mongoServer = new MongoMemoryServer();
-  mongoServer.getUri().then((uri) => {
-    mongoose.connect(uri).then(() => {
-      console.log('Connected to in-memory MongoDB');
-      seedDatabase(); // Seed the database with initial data on start
+const startServer = async () => {
+  if (process.env.NODE_ENV === 'production') {
+    // Use MongoDB Memory Server for demo environment
+    mongoServer = await MongoMemoryServer.create();
+    const uri = mongoServer.getUri();
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('Connected to in-memory MongoDB');
+    await seedDatabase(); // Seed the database with initial data on start
+  } else {
+    // Connect to real MongoDB in non-demo environments
+    DB = process.env.DATABASE.replace(
+      '<PASSWORD>',
+      process.env.DATABASE_PASSWORD
+    );
+    await mongoose.connect(DB, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('Connected to MongoDB');
+  }
+
+  const port = process.env.PORT || 3000;
+  const server = app.listen(port, () => {
+    console.log(`App running on port ${port}...`);
+  });
+
+  process.on('unhandledRejection', (err) => {
+    console.log('UNHANDLED REJECTION! SHUTTING DOWN...');
+    console.log(err.name, err.message);
+    server.close(() => {
+      process.exit(1);
     });
   });
-} else {
-  // Connect to real MongoDB in non-demo environments
-  DB = process.env.DATABASE.replace(
-    '<PASSWORD>',
-    process.env.DATABASE_PASSWORD
-  );
-  mongoose.connect(DB).then(() => {
-    console.log('Connected to MongoDB');
-  });
-}
+};
 
-const port = process.env.PORT || 3000;
-const server = app.listen(port, () => {
-  console.log(`App running on port ${port}...`);
-});
-
-process.on('unhandledRejection', (err) => {
-  console.log('UNHANDLED REJECTION! SHUTTING DOWN...');
-  console.log(err.name, err.message);
-  server.close(() => {
-    process.exit(1);
-  });
-});
-
+startServer();
 // Connect to the appropriate database (in-memory or real MongoDB)
 
 // // console.log(process.env);
