@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const fs = require('fs');
 const Tour = require('./../../models/tourModel');
 const User = require('./../../models/userModel');
@@ -14,10 +15,14 @@ const reviews = JSON.parse(
 const seedDatabase = async () => {
   try {
     // Clear existing data
+    await Tour.deleteMany();
     await User.deleteMany();
+    await Review.deleteMany();
 
     // Seed data
+    await Tour.create(tours);
     await User.create(users);
+    await Review.create(reviews);
 
     console.log('Database seeded successfully!');
   } catch (err) {
