@@ -22,8 +22,8 @@ exports.endTransaction = async (req, res, next) => {
     }
   } catch (error) {
     // If an error occurs, abort the transaction
-    await req.session.abortTransaction();
     console.error('Transaction aborted due to an error', error);
+    await req.session.abortTransaction();
   } finally {
     req.session.endSession();
     next();
