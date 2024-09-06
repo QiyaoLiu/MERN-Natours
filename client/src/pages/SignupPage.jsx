@@ -17,6 +17,7 @@ export default function SignupPage() {
     axios
       .get("/users/roles")
       .then((res) => {
+        console.log("Fetched roles:", res.data);
         setRoles(res.data);
       })
       .catch((error) => {
