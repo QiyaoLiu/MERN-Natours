@@ -29,11 +29,13 @@ const userSchema = new mongoose.Schema({
   },
   passwordConfirm: {
     type: String,
-    required: [true, 'Please confirm your password'],
+    required: function () {
+      // Only require passwordConfirm for new users, not for seeding
+      return this.isNew;
+    },
     validate: {
-      // Only validate passwordConfirm when creating a new user
       validator: function (el) {
-        return this.isNew || el === this.password;
+        return el === this.password;
       },
       message: 'Passwords are not the same',
     },
