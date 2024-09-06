@@ -66,8 +66,9 @@ router.delete(
   '/pauseMe',
 
   userController.pauseMe
-),
-  router.use(authController.restrictTo('admin'));
+);
+
+router.use(authController.restrictTo('admin'));
 
 router
   .route('/')
