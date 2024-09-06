@@ -10,23 +10,36 @@ const reviews = JSON.parse(
   fs.readFileSync(`${__dirname}/reviews.json`, 'utf-8')
 );
 
-// Function to seed the database with initial data
+// Seed database function
 const seedDatabase = async () => {
   try {
-    // Clear the in-memory database
-    await Tour.deleteMany();
+    // Clear existing data
     await User.deleteMany();
-    await Review.deleteMany();
 
-    // Insert data into the database
-    await Tour.insertMany(tours);
-    await User.insertMany(users);
-    await Review.insertMany(reviews);
+    // Seed data
+    await User.create(users);
 
-    console.log('Database seeded with initial data');
+    console.log('Database seeded successfully!');
   } catch (err) {
     console.error('Failed to seed database:', err);
+  } finally {
+    // Close the connection
+    mongoose.connection.close();
   }
 };
 
-module.exports = seedDatabase;
+// Connect to MongoDB and start the seeding process
+const DB = process.env.DATABASE.replace(
+  '<PASSWORD>',
+  process.env.DATABASE_PASSWORD
+);
+
+mongoose
+  .connect(DB, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('Connected to MongoDB');
+    seedDatabase();
+  })
+  .catch((err) => {
+    console.error('Failed to connect to MongoDB:', err);
+  });
