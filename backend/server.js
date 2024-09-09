@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const app = require('./app');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const { connectDatabase, closeDatabase } = require('./utils/database');
 
 // Load environment variables
 dotenv.config({ path: './config.env' });
@@ -14,31 +13,8 @@ process.on('uncaughtException', (err) => {
 });
 
 const startServer = async () => {
-  let mongoServer;
-
   try {
-    let DB;
-
-    if (process.env.NODE_ENV === 'production') {
-      // Use MongoDB Memory Server in production
-      mongoServer = await MongoMemoryServer.create();
-      DB = mongoServer.getUri();
-      console.log('Using in-memory MongoDB (production)');
-    } else {
-      // Connect to actual MongoDB in development
-      DB = process.env.DATABASE.replace(
-        '<PASSWORD>',
-        process.env.DATABASE_PASSWORD
-      );
-      if (!DB) {
-        console.error('DATABASE environment variable is not set.');
-        process.exit(1);
-      }
-      console.log('Using real MongoDB (development)');
-    }
-
-    await mongoose.connect(DB);
-    console.log('Connected to MongoDB');
+    await connectDatabase();
 
     const port = process.env.PORT || 3000;
     const server = app.listen(port, () => {
@@ -53,22 +29,15 @@ const startServer = async () => {
       });
     });
 
-    // Clean up MongoDB Memory Server when the server shuts down
-    process.on('SIGINT', async () => {
-      if (mongoServer) {
-        await mongoServer.stop();
-      }
-      mongoose.connection.close();
+    // Graceful shutdown
+    const shutdown = async () => {
+      console.log('SIGTERM or SIGINT received, shutting down gracefully...');
+      await closeDatabase();
       process.exit(0);
-    });
+    };
 
-    process.on('SIGTERM', async () => {
-      if (mongoServer) {
-        await mongoServer.stop();
-      }
-      mongoose.connection.close();
-      process.exit(0);
-    });
+    process.on('SIGINT', shutdown);
+    process.on('SIGTERM', shutdown);
   } catch (err) {
     console.error('Error starting server:', err);
     process.exit(1);

@@ -1,10 +1,8 @@
-const mongoose = require('mongoose');
 const fs = require('fs');
-const { MongoMemoryServer } = require('mongodb-memory-server');
+const { connectDatabase, closeDatabase } = require('./../../utils/database');
 const Tour = require('./../../models/tourModel');
 const User = require('./../../models/userModel');
 const Review = require('./../../models/reviewModel');
-require('dotenv').config({ path: './config.env' });
 
 // Read JSON files
 const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
@@ -13,7 +11,6 @@ const reviews = JSON.parse(
   fs.readFileSync(`${__dirname}/reviews.json`, 'utf-8')
 );
 
-// Seed database function
 const seedDatabase = async () => {
   try {
     await Tour.deleteMany();
@@ -22,50 +19,27 @@ const seedDatabase = async () => {
 
     const usersWithPasswordConfirm = users.map((user) => ({
       ...user,
-      passwordConfirm: user.password, // Assuming passwordConfirm is the same as password for seeding
+      passwordConfirm: user.password,
     }));
 
+    await Tour.create(tours);
     await User.create(usersWithPasswordConfirm);
     await Review.create(reviews);
 
     console.log('Database seeded successfully!');
   } catch (err) {
     console.error('Failed to seed database:', err);
-  } finally {
-    mongoose.connection.close();
-    console.log('Database connection closed.');
   }
 };
 
 const startSeeding = async () => {
   try {
-    let DB;
-
-    if (process.env.NODE_ENV === 'production') {
-      // Use MongoDB Memory Server in production
-      const mongoServer = await MongoMemoryServer.create();
-      DB = mongoServer.getUri();
-      console.log('Using in-memory MongoDB for seeding');
-    } else {
-      // Connect to actual MongoDB in development
-      DB = process.env.DATABASE.replace(
-        '<PASSWORD>',
-        process.env.DATABASE_PASSWORD
-      );
-      if (!DB) {
-        console.error('DATABASE environment variable is not set.');
-        process.exit(1);
-      }
-      console.log('Using real MongoDB for seeding');
-    }
-
-    await mongoose.connect(DB);
-    console.log('Connected to MongoDB for seeding');
-
+    await connectDatabase();
     await seedDatabase();
   } catch (err) {
     console.error('Failed to seed database:', err);
-    process.exit(1);
+  } finally {
+    await closeDatabase();
   }
 };
 
