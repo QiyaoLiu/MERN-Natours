@@ -12,7 +12,7 @@ import { UserContextProvider } from "./UserContext.jsx";
 import Notification from "./Notification.jsx";
 
 axios.defaults.baseURL =
-  process.env.NODE_ENV === "production"
+  process.env.NODE_ENV === "staging"
     ? "https://mern-natours-backend.onrender.com/api/v1" // Use deployed backend URL
     : "http://localhost:8000/api/v1"; // Local development backend
 axios.defaults.withCredentials = true;

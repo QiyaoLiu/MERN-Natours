@@ -1,46 +1,50 @@
-// const fs = require('fs');
-// const { connectDatabase, closeDatabase } = require('./../../utils/database');
-// const Tour = require('./../../models/tourModel');
-// const User = require('./../../models/userModel');
-// const Review = require('./../../models/reviewModel');
+// resetDatabase.js
+const mongoose = require('mongoose');
+const fs = require('fs');
+const dotenv = require('dotenv');
+const Tour = require('./models/tourModel'); // Example model, replace with your models
+const User = require('./models/userModel'); // Example model, replace with your models
+const Review = require('./models/reviewModel'); // Example model, replace with your models
 
-// // Read JSON files
-// const tours = JSON.parse(fs.readFileSync(`${__dirname}/tours.json`, 'utf-8'));
-// const users = JSON.parse(fs.readFileSync(`${__dirname}/users.json`, 'utf-8'));
-// const reviews = JSON.parse(
-//   fs.readFileSync(`${__dirname}/reviews.json`, 'utf-8')
-// );
+dotenv.config({ path: './.env.staging' });
 
-// const seedDatabase = async () => {
-//   try {
-//     await Tour.deleteMany();
-//     await User.deleteMany();
-//     await Review.deleteMany();
+// Read JSON files for the default data
+const tours = JSON.parse(
+  fs.readFileSync(`${__dirname}/data/tours.json`, 'utf-8')
+);
+const users = JSON.parse(
+  fs.readFileSync(`${__dirname}/data/users.json`, 'utf-8')
+);
+const reviews = JSON.parse(
+  fs.readFileSync(`${__dirname}/data/reviews.json`, 'utf-8')
+);
 
-//     const usersWithPasswordConfirm = users.map((user) => ({
-//       ...user,
-//       passwordConfirm: user.password,
-//     }));
+// Function to reset and seed the database
+const resetDatabase = async () => {
+  try {
+    // Connect to MongoDB
+    await mongoose.connect(process.env.DATABASE_URI);
 
-//     await Tour.create(tours);
-//     await User.create(usersWithPasswordConfirm);
-//     await Review.create(reviews);
+    console.log('Connected to MongoDB for database reset');
 
-//     console.log('Database seeded successfully!');
-//   } catch (err) {
-//     console.error('Failed to seed database:', err);
-//   }
-// };
+    // Drop collections (or you can delete specific documents)
+    await Tour.deleteMany();
+    await User.deleteMany();
+    await Review.deleteMany();
 
-// const startSeeding = async () => {
-//   try {
-//     await connectDatabase();
-//     await seedDatabase();
-//   } catch (err) {
-//     console.error('Failed to seed database:', err);
-//   } finally {
-//     await closeDatabase();
-//   }
-// };
+    // Seed the database with default data
+    await Tour.create(tours);
+    await User.create(users);
+    await Review.create(reviews);
 
-// startSeeding();
+    console.log('Database reset and seeded with initial data!');
+  } catch (err) {
+    console.error('Error resetting database:', err);
+  } finally {
+    await mongoose.connection.close();
+    console.log('MongoDB connection closed');
+  }
+};
+
+// Run the reset function
+resetDatabase();

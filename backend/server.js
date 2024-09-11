@@ -2,8 +2,10 @@ const dotenv = require('dotenv');
 const path = require('path');
 const app = require('./app');
 const { connectDatabase, closeDatabase } = require('./utils/database');
+const cron = require('node-cron');
+const { exec } = require('child_process');
 
-// Load environment variables based on NODE_ENV
+// Load environment variables
 const envFile = `.env.${process.env.NODE_ENV || 'development'}`;
 dotenv.config({ path: path.resolve(__dirname, envFile) });
 
@@ -28,6 +30,22 @@ const startServer = async () => {
       console.log(err.name, err.message);
       server.close(() => {
         process.exit(1);
+      });
+    });
+
+    // Set up a cron job to reset the database periodically
+    cron.schedule('0 0 * * *', () => {
+      // This example runs daily at midnight
+      console.log('Running scheduled task to reset database...');
+      exec('node seed.js', (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error executing seed.js: ${error}`);
+          return;
+        }
+        console.log(`seed.js output: ${stdout}`);
+        if (stderr) {
+          console.error(`seed.js error: ${stderr}`);
+        }
       });
     });
 
