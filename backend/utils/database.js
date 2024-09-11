@@ -1,37 +1,44 @@
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 
-let mongoServer;
+// Function to replace placeholders in the URI
+const getDatabaseUri = () => {
+  const uri = process.env.DATABASE_URI;
+  const username = process.env.DATABASE_USERNAME;
+  const password = process.env.DATABASE_PASSWORD;
 
-const connectDatabase = async () => {
-  let DB;
-
-  if (process.env.NODE_ENV === 'production') {
-    // Use MongoDB Memory Server in production
-    mongoServer = await MongoMemoryServer.create();
-    DB = mongoServer.getUri();
-    console.log('Using in-memory MongoDB');
-  } else {
-    // Connect to actual MongoDB in development
-    DB = process.env.DATABASE.replace(
-      '<PASSWORD>',
-      process.env.DATABASE_PASSWORD
+  if (!uri || !username || !password) {
+    console.error(
+      'DATABASE_URI, DATABASE_USERNAME, or DATABASE_PASSWORD is not set.'
     );
-    if (!DB) {
-      console.error('DATABASE environment variable is not set.');
-      process.exit(1);
-    }
-    console.log('Using real MongoDB');
+    process.exit(1);
   }
 
-  await mongoose.connect(DB);
-  console.log('Connected to MongoDB');
+  // Replace placeholders in the URI
+  return uri.replace('<USERNAME>', username).replace('<PASSWORD>', password);
+};
+
+const connectDatabase = async () => {
+  const DB = getDatabaseUri();
+
+  if (process.env.NODE_ENV === 'staging') {
+    console.log('Connecting to MongoDB staging environment...');
+  } else {
+    console.log('Connecting to MongoDB development environment...');
+  }
+
+  try {
+    await mongoose.connect(DB, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log('Connected to MongoDB');
+  } catch (err) {
+    console.error('Error connecting to MongoDB:', err);
+    process.exit(1);
+  }
 };
 
 const closeDatabase = async () => {
-  if (mongoServer) {
-    await mongoServer.stop();
-  }
   await mongoose.connection.close();
   console.log('MongoDB connection closed');
 };

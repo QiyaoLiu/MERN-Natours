@@ -1,9 +1,11 @@
 const dotenv = require('dotenv');
+const path = require('path');
 const app = require('./app');
 const { connectDatabase, closeDatabase } = require('./utils/database');
 
-// Load environment variables
-dotenv.config({ path: './config.env' });
+// Load environment variables based on NODE_ENV
+const envFile = `.env.${process.env.NODE_ENV || 'development'}`;
+dotenv.config({ path: path.resolve(__dirname, envFile) });
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
