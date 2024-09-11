@@ -1,67 +1,41 @@
+const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const path = require('path');
-const app = require('./app');
-const { connectDatabase, closeDatabase } = require('./utils/database');
-const cron = require('node-cron');
-const { exec } = require('child_process');
+dotenv.config({ path: './config.env' });
+console.log('DATABASE:', process.env.DATABASE);
+console.log('DATABASE_PASSWORD:', process.env.DATABASE_PASSWORD);
 
-// Load environment variables
-const envFile = `.env.${process.env.NODE_ENV || 'development'}`;
-dotenv.config({ path: path.resolve(__dirname, envFile) });
-
-// Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
-  console.log('UNCAUGHT EXCEPTION! SHUTTING DOWN...');
+  console.log('UNCAUGHT EXCEPTION! 💥 Shutting down...');
   console.log(err.name, err.message);
   process.exit(1);
 });
 
-const startServer = async () => {
-  try {
-    await connectDatabase();
+dotenv.config({ path: './config.env' });
+const app = require('./app');
 
-    const port = process.env.PORT || 3000;
-    const server = app.listen(port, () => {
-      console.log(`App running on port ${port}...`);
-    });
+const DB = process.env.DATABASE.replace(
+  '<USERNAME>',
+  process.env.DATABASE_USERNAME
+).replace('<PASSWORD>', process.env.DATABASE_PASSWORD);
 
-    process.on('unhandledRejection', (err) => {
-      console.log('UNHANDLED REJECTION! SHUTTING DOWN...');
-      console.log(err.name, err.message);
-      server.close(() => {
-        process.exit(1);
-      });
-    });
+mongoose.connect(DB).then(() => console.log('DB connection successful!'));
 
-    // Set up a cron job to reset the database periodically
-    cron.schedule('0 0 * * *', () => {
-      // This example runs daily at midnight
-      console.log('Running scheduled task to reset database...');
-      exec('node seed.js', (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Error executing seed.js: ${error}`);
-          return;
-        }
-        console.log(`seed.js output: ${stdout}`);
-        if (stderr) {
-          console.error(`seed.js error: ${stderr}`);
-        }
-      });
-    });
+const port = process.env.PORT || 3000;
+const server = app.listen(port, () => {
+  console.log(`App running on port ${port}...`);
+});
 
-    // Graceful shutdown
-    const shutdown = async () => {
-      console.log('SIGTERM or SIGINT received, shutting down gracefully...');
-      await closeDatabase();
-      process.exit(0);
-    };
-
-    process.on('SIGINT', shutdown);
-    process.on('SIGTERM', shutdown);
-  } catch (err) {
-    console.error('Error starting server:', err);
+process.on('unhandledRejection', (err) => {
+  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+  console.log(err.name, err.message);
+  server.close(() => {
     process.exit(1);
-  }
-};
+  });
+});
 
-startServer();
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+  server.close(() => {
+    console.log('💥 Process terminated!');
+  });
+});
