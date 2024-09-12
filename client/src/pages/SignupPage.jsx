@@ -39,7 +39,7 @@ export default function SignupPage() {
         role,
       });
 
-      console.log("Signup successful:", res.data.data);
+      console.log("Signup successful:", res.data.user);
 
       // Check if the response indicates success and includes a token
       if (res.status === "success") {
@@ -59,6 +59,7 @@ export default function SignupPage() {
         navigate("/");
       } else {
         // Handle any other response status
+        console.log(error);
         showNotification("Signup successful but login failed. Please log in.");
       }
     } catch (error) {
