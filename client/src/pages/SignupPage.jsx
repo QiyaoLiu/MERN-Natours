@@ -10,7 +10,7 @@ export default function SignupPage() {
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [role, setRole] = useState("user");
   const [roles, setRoles] = useState([]);
-  const { showNotification } = useContext(UserContext);
+  const { showNotification, setUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,29 +32,36 @@ export default function SignupPage() {
   const signup = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("users/signup", {
+      const res = await axios.post("/users/signup", {
         name,
         email,
         password,
         passwordConfirm,
         role,
       });
+
       console.log("Signup successful:", res.data.data);
-     // Check if the response indicates success and includes a token
-     if (res.data.status === "success") {
-      // Store the token in localStorage using the key "authToken"
-      localStorage.setItem("authToken", res.data.token);
 
-      // update the user context with logged-in user details
-      const { user } = res.data.data;
-      setUser({
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        isLoggedIn: true,
-      });
+      // Check if the response indicates success and includes a token
+      if (res.data.status === "success") {
+        // Store the token in localStorage using the key "authToken"
+        localStorage.setItem("authToken", res.data.token);
 
-      navigate("/");
+        // Optionally, update the user context with logged-in user details
+        const { user } = res.data.data;
+        setUser({
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          isLoggedIn: true,
+        });
+
+        // Redirect the user to the home page after successful signup and login
+        navigate("/");
+      } else {
+        // Handle any other response status
+        showNotification("Signup successful but login failed. Please log in.");
+      }
     } catch (error) {
       console.error("Signup failed:", error.response?.data);
       showNotification(
@@ -62,11 +69,12 @@ export default function SignupPage() {
       );
     }
   };
+
   return (
-    <div className="mt-4 grow flex  flex-col min-h-screen items-center justify-around">
+    <div className="mt-4 grow flex flex-col min-h-screen items-center justify-around">
       <div className="mb-64">
         <h1 className="text-4xl text-center mb-4">Sign Up</h1>
-        <form className="max-w-md  mx-auto" onSubmit={signup}>
+        <form className="max-w-md mx-auto" onSubmit={signup}>
           <input
             type="text"
             placeholder="username"
@@ -91,7 +99,7 @@ export default function SignupPage() {
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
           />
-          <div className="flex  py-2">
+          <div className="flex py-2">
             <h3 className="py-2 px-4">Role:</h3>
             <select
               className="border mx-2 py-2 px-2 rounded-2xl"
