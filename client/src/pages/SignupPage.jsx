@@ -17,7 +17,6 @@ export default function SignupPage() {
     axios
       .get("/users/roles")
       .then((res) => {
-        console.log("Fetched roles:", res.data);
         setRoles(res.data);
       })
       .catch((error) => {
@@ -43,9 +42,9 @@ export default function SignupPage() {
       console.log("Signup successful:", res.data.data);
 
       // Check if the response indicates success and includes a token
-      if (res.data.status === "success") {
+      if (res.status === "success") {
         // Store the token in localStorage using the key "authToken"
-        localStorage.setItem("authToken", res.data.token);
+        localStorage.setItem("authToken", res.token);
 
         // Optionally, update the user context with logged-in user details
         const { user } = res.data.data;
