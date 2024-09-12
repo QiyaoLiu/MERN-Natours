@@ -40,6 +40,20 @@ export default function SignupPage() {
         role,
       });
       console.log("Signup successful:", res.data.data);
+      // Automatically log in the user after signup
+      const { token, user } = res.data.data;
+
+      // Store the token (typically in localStorage or cookies)
+      localStorage.setItem("token", token);
+
+      // Update the user context to reflect the logged-in state
+      setUser({
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isLoggedIn: true,
+      });
+
       navigate("/");
     } catch (error) {
       console.error("Signup failed:", error.response?.data);

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is a full-stack application featuring a backend developed with Node.js, Express, and MongoDB, and a frontend built using React. The backend was developed based on the Udemy course "Node.js, Express, MongoDB & More: The Complete Bootcamp," while the frontend was crafted independently.
+This project is a full-stack application featuring a backend developed with Node.js, Express, and MongoDB, and a frontend built using React. The backend was developed based on the Udemy course "Node.js, Express, MongoDB & More: The Complete Bootcamp". The frontend was crafted independently while using static materials from this course.
 
 ## Features
 
