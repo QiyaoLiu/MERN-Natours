@@ -39,15 +39,18 @@ export default function SignupPage() {
         role,
       });
 
-      console.log("Signup successful:", res.data.user);
+      console.log("Signup successful:", res.data);
 
-      // Check if the response indicates success and includes a token
-      if (res.status === "success") {
+      // Check if the response indicates success
+      if (res.data.status === "success") {
+        // Extract the token from the response
+        const token = res.data.token;
+
         // Store the token in localStorage using the key "authToken"
-        localStorage.setItem("authToken", res.token);
+        localStorage.setItem("authToken", token);
 
         // Optionally, update the user context with logged-in user details
-        const { user } = res.data.user;
+        const user = res.data.data.user;
         setUser({
           name: user.name,
           email: user.email,
@@ -59,7 +62,6 @@ export default function SignupPage() {
         navigate("/");
       } else {
         // Handle any other response status
-        console.log(error);
         showNotification("Signup successful but login failed. Please log in.");
       }
     } catch (error) {
