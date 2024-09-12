@@ -47,7 +47,7 @@ export default function SignupPage() {
         localStorage.setItem("authToken", res.token);
 
         // Optionally, update the user context with logged-in user details
-        const { user } = res.data.data;
+        const { user } = res.data.user;
         setUser({
           name: user.name,
           email: user.email,
