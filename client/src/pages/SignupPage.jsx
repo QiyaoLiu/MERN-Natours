@@ -40,13 +40,13 @@ export default function SignupPage() {
         role,
       });
       console.log("Signup successful:", res.data.data);
-      // Automatically log in the user after signup
-      const { token, user } = res.data.data;
+     // Check if the response indicates success and includes a token
+     if (res.data.status === "success") {
+      // Store the token in localStorage using the key "authToken"
+      localStorage.setItem("authToken", res.data.token);
 
-      // Store the token (typically in localStorage or cookies)
-      localStorage.setItem("token", token);
-
-      // Update the user context to reflect the logged-in state
+      // update the user context with logged-in user details
+      const { user } = res.data.data;
       setUser({
         name: user.name,
         email: user.email,
